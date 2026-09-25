@@ -67,3 +67,11 @@ missing F0Md smc_result 132 key not found
 missing F1Md smc_result 132 key not found
 missing Ftst smc_result 132 key not found
 ```
+
+## Write trial
+
+A program outside this repository tried one write on 2026-09-25 as uid 501. Before the write, `F0md` was 0, `F0Tg` was 2317 rpm, `F0Mn` was 2317 rpm, and `F0Mx` was 7826 rpm. The trial sent `1` to `F0md`. The planned `F0Tg` value was 3200 rpm, inside that firmware range.
+
+`IOConnectCallStructMethod` returned `kIOReturnNotPrivileged` (`0xe00002c1`). The following read showed `F0md` still 0, so nothing was restored and `F0Tg` was not written. The process did not retry as root.
+
+Notes for Mac17,7 on macOS 26.4.1 describe a direct `F0md = 1` write, then `F0Tg`, with `Ftst` absent. Those writes were run as root. This macOS 27 trial shows that the same mode write is rejected for uid 501. It does not show whether a target write moves the fan.
