@@ -70,8 +70,10 @@ missing Ftst smc_result 132 key not found
 
 ## Write trial
 
-A program outside this repository tried one write on 2026-09-25 as uid 501. Before the write, `F0md` was 0, `F0Tg` was 2317 rpm, `F0Mn` was 2317 rpm, and `F0Mx` was 7826 rpm. The trial sent `1` to `F0md`. The planned `F0Tg` value was 3200 rpm, inside that firmware range.
+On 2026-09-25 a program outside this repository tried fan 0 only. `F0Mn` was 2317 rpm and `F0Mx` was 7826 rpm. The planned target was 3200 rpm.
 
-`IOConnectCallStructMethod` returned `kIOReturnNotPrivileged` (`0xe00002c1`). The following read showed `F0md` still 0, so nothing was restored and `F0Tg` was not written. The process did not retry as root.
+As uid 501, writing `1` to `F0md` returned `kIOReturnNotPrivileged` (`0xe00002c1`). The key stayed `0`, and `F0Tg` was not written.
 
-Notes for Mac17,7 on macOS 26.4.1 describe a direct `F0md = 1` write, then `F0Tg`, with `Ftst` absent. Those writes were run as root. This macOS 27 trial shows that the same mode write is rejected for uid 501. It does not show whether a target write moves the fan.
+The same program then ran as root, after an administrator prompt. Before the write, `F0md` was 0, `F0Tg` was 2574 rpm, and `F0Ac` was 2577 rpm. Writing `F0md = 1` succeeded, then writing `F0Tg = 3200` succeeded. Over the next samples `F0Tg` stayed 3200 and `F0Ac` moved 2575, 2979, 3177, 3225, 3230, 3217, 3215, 3205. Fan 1 was not written; its actual speed stayed near 2780 rpm.
+
+The process wrote `F0md` back to 0 before exiting. A later unprivileged read showed `F0md` 0, `F0Tg` 2513 rpm, and `F0Ac` 2516 rpm. `F1md` was still 0. No `Ftst` write was sent.
