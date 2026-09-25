@@ -19,20 +19,21 @@ Read the fan keys on this machine.
 - firmware minimum and maximum
 - the mode key, spelled the way this firmware spells it
 
-No fan speed is written. A mode write takes the fan away from the system. That waits until a read shows which keys exist here.
+With no arguments the program only reads. `--rpm` holds every fan at one speed until the process leaves, then writes each mode key back to the value it had before the hold.
 
 ## Interface
 
-On this machine the registry entry is `AppleSMCKeysEndpoint`, under `smc@8C600000`. Its user client is `AppleSMCClient`. `thermalmonitord` is already connected. The probe calls `IOConnectCallStructMethod` selector 2 with an 80-byte structure. It sends read-index, read-key-info, and read-bytes only. Fan-key reads on this Mac succeeded as uid 501. Writes are not part of this milestone.
+On this machine the registry entry is `AppleSMCKeysEndpoint`, under `smc@8C600000`. Its user client is `AppleSMCClient`. `thermalmonitord` is already connected. The program calls `IOConnectCallStructMethod` selector 2 with an 80-byte structure. Reads use read-index, read-key-info, and read-bytes. `--rpm` also sends write-bytes, and only as root. Fan-key reads on this Mac succeeded as uid 501. An unprivileged mode write returns `kIOReturnNotPrivileged`.
 
 ## Build
 
 ```
 make
 ./build/anemokey
+sudo ./build/anemokey --rpm 4000
 ```
 
-`make` writes `build/anemokey`. The probe does not request root.
+`make` writes `build/anemokey`. The read command does not request root. `--rpm` runs in the foreground and applies the speed to every fan reported by `FNum`. The number has to sit inside each fan's firmware minimum and maximum. Ctrl-C sends `SIGINT`. The process then writes the saved mode byte back. `SIGTERM` and `SIGHUP` take the same path. `SIGKILL` does not.
 
 ## Observed on this Mac
 

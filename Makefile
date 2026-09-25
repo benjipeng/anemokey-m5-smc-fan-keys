@@ -6,9 +6,11 @@ LDFLAGS ?= -framework IOKit
 
 all: build/anemokey
 
-build/anemokey: src/anemokey.c
+SRCS = src/main.c src/probe.c src/hold.c src/smc.c
+
+build/anemokey: $(SRCS) src/smc.h src/probe.h src/hold.h
 	mkdir -p build
-	$(CC) $(CFLAGS) -o $@ src/anemokey.c $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $(SRCS) $(LDFLAGS)
 
 clean:
 	rm -rf build
